@@ -22,6 +22,20 @@ export interface GameState {
     cardId: string;
     playerId: string;
   };
+  pendingSteal?: {
+    cardId: string;
+    playerId: string;
+    targetCards: GameCardData[];
+  };
+  pendingTrade?: {
+    cardId: string;
+    playerId: string;
+  };
+  pendingRent?: {
+    cardId: string;
+    playerId: string;
+    availableColors: string[];
+  };
 }
 
 export interface BotAction {

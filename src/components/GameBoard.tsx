@@ -8,6 +8,7 @@ import GameRules from "./GameRules";
 import BankArea from "./BankArea";
 import PropertyGroups from "./PropertyGroups";
 import WildCardSelector from "./WildCardSelector";
+import ActionSelector from "./ActionSelector";
 import { allCards, propertyCards, actionCards, moneyCards } from "@/data/gameCards";
 import { useGameLogic } from "@/hooks/useGameLogic";
 import { Player } from "@/types/game";
@@ -24,7 +25,10 @@ const GameBoard = () => {
     executeBotTurn,
     getCompletedSets,
     selectWildCardColor,
-    cancelWildCard
+    cancelWildCard,
+    selectStealTarget,
+    selectRentColor,
+    cancelAction
   } = useGameLogic();
 
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
@@ -323,13 +327,40 @@ const GameBoard = () => {
           </TabsContent>
         </Tabs>
         
-        {/* Wild Card Color Selector */}
-        {gameState.pendingWildCard && (
-          <WildCardSelector 
-            onSelectColor={selectWildCardColor}
-            onCancel={cancelWildCard}
-          />
-        )}
+      {/* Wild Card Color Selector */}
+      {gameState.pendingWildCard && (
+        <WildCardSelector
+          onSelectColor={selectWildCardColor}
+          onCancel={cancelWildCard}
+        />
+      )}
+
+      {/* Action Selectors */}
+      {gameState.pendingSteal && (
+        <ActionSelector
+          type="steal"
+          availableCards={gameState.pendingSteal.targetCards}
+          onSelect={selectStealTarget}
+          onCancel={cancelAction}
+        />
+      )}
+
+      {gameState.pendingTrade && (
+        <ActionSelector
+          type="trade"
+          onSelect={() => {}} // TODO: Implement trade logic
+          onCancel={cancelAction}
+        />
+      )}
+
+      {gameState.pendingRent && (
+        <ActionSelector
+          type="rent"
+          availableColors={gameState.pendingRent.availableColors}
+          onSelect={selectRentColor}
+          onCancel={cancelAction}
+        />
+      )}
       </div>
     </div>
   );

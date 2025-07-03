@@ -180,12 +180,12 @@ export const actionCards: GameCardData[] = [
     value: 1
   },
   {
-    id: 'damascus-rose',
+    id: 'ta3feesh',
     type: 'action',
-    title: 'Damascus Rose',
-    titleArabic: 'وردة دمشق',
-    description: 'Steal property',
-    icon: '🌹',
+    title: 'Ta3feesh',
+    titleArabic: 'تعفيش',
+    description: 'Steal a property',
+    icon: '🎯',
     value: 3
   },
   {
@@ -202,7 +202,7 @@ export const actionCards: GameCardData[] = [
     type: 'action',
     title: 'Wedding Party',
     titleArabic: 'حفلة زواج',
-    description: 'Collect money',
+    description: 'Opponent pays 5K',
     icon: '💒',
     value: 4
   },
@@ -211,9 +211,40 @@ export const actionCards: GameCardData[] = [
     type: 'action',
     title: 'Souk Shopping',
     titleArabic: 'تسوق في السوق',
-    description: 'Trade cards',
+    description: 'Trade cards with opponent',
     icon: '🛍️',
     value: 2
+  },
+  // Rent cards - each covers two color sets
+  {
+    id: 'rent-red-yellow',
+    type: 'action',
+    title: 'Rent Collection',
+    titleArabic: 'جمع الإيجار',
+    description: 'Collect rent from Red/Yellow sets',
+    icon: '💸',
+    value: 1,
+    rentColors: ['red', 'yellow']
+  },
+  {
+    id: 'rent-blue-green',
+    type: 'action',
+    title: 'Rent Collection',
+    titleArabic: 'جمع الإيجار',
+    description: 'Collect rent from Blue/Green sets',
+    icon: '💸',
+    value: 1,
+    rentColors: ['blue', 'green']
+  },
+  {
+    id: 'rent-wild',
+    type: 'action',
+    title: 'Wild Rent',
+    titleArabic: 'إيجار شامل',
+    description: 'Collect rent from any color',
+    icon: '🌟',
+    value: 3,
+    rentColors: ['red', 'blue', 'green', 'yellow']
   }
 ];
 

@@ -126,7 +126,10 @@ export const useGameLogic = () => {
         console.log(`Property added: ${propertyCard.title}, Color: ${propertyCard.color}, Set size: ${propertyCard.setSize}`);
       } else if (card.type === 'action') {
         // Handle action card effects
-        handleActionCard(card, newState, playerIndex);
+        const actionResult = handleActionCard(card, newState, playerIndex);
+        if (actionResult === 'pending') {
+          return newState; // Don't proceed if action needs selection
+        }
       }
       
       newState.discardPile.push(card);
@@ -148,6 +151,121 @@ export const useGameLogic = () => {
 
   const cancelWildCard = useCallback(() => {
     setGameState(prev => ({ ...prev, pendingWildCard: undefined }));
+  }, []);
+
+  const selectStealTarget = useCallback((targetCardId: string) => {
+    if (!gameState.pendingSteal) return;
+    
+    setGameState(prev => {
+      const newState = { ...prev };
+      const playerIndex = newState.players.findIndex(p => p.id === gameState.pendingSteal!.playerId);
+      const opponentIndex = 1 - playerIndex;
+      
+      if (playerIndex === -1) return prev;
+      
+      const player = newState.players[playerIndex];
+      const opponent = newState.players[opponentIndex];
+      
+      const cardIndex = opponent.properties.findIndex(c => c.id === targetCardId);
+      if (cardIndex !== -1) {
+        const stolenCard = opponent.properties.splice(cardIndex, 1)[0];
+        player.properties.push(stolenCard);
+      }
+      
+      newState.pendingSteal = undefined;
+      newState.turnActions--;
+      
+      return newState;
+    });
+  }, [gameState.pendingSteal]);
+
+  const selectRentColor = useCallback((color: string) => {
+    if (!gameState.pendingRent) return;
+    
+    setGameState(prev => {
+      const newState = { ...prev };
+      const playerIndex = newState.players.findIndex(p => p.id === gameState.pendingRent!.playerId);
+      const opponentIndex = 1 - playerIndex;
+      
+      if (playerIndex === -1) return prev;
+      
+      const player = newState.players[playerIndex];
+      const opponent = newState.players[opponentIndex];
+      
+      // Calculate rent based on properties of selected color
+      const colorProperties = player.properties.filter(p => p.color === color || p.assignedColor === color);
+      const rentAmount = calculateRent(colorProperties, color);
+      
+      // Collect rent from opponent
+      collectRentFromPlayer(opponent, player, rentAmount);
+      
+      newState.pendingRent = undefined;
+      newState.turnActions--;
+      
+      return newState;
+    });
+  }, [gameState.pendingRent]);
+
+  const calculateRent = (properties: GameCardData[], color: string): number => {
+    const colorData = { red: 4, blue: 3, green: 2, yellow: 3 };
+    const setSize = colorData[color as keyof typeof colorData] || 2;
+    const propertyCount = properties.length;
+    
+    // Rent increases with more properties in set
+    const rentTable = {
+      red: [1, 2, 3, 6],
+      blue: [1, 2, 4],
+      green: [1, 2],
+      yellow: [1, 2, 4]
+    };
+    
+    const rents = rentTable[color as keyof typeof rentTable] || [1, 2];
+    return rents[Math.min(propertyCount - 1, rents.length - 1)] || 0;
+  };
+
+  const collectRentFromPlayer = (fromPlayer: Player, toPlayer: Player, amount: number) => {
+    let collected = 0;
+    const toRemove: { from: 'bank' | 'hand', index: number }[] = [];
+    
+    // Try to collect from bank first
+    for (let i = 0; i < fromPlayer.bank.length && collected < amount; i++) {
+      const card = fromPlayer.bank[i];
+      if (collected + card.value <= amount) {
+        toRemove.push({ from: 'bank', index: i });
+        collected += card.value;
+      }
+    }
+    
+    // If not enough in bank, take from hand
+    if (collected < amount) {
+      for (let i = 0; i < fromPlayer.hand.length && collected < amount; i++) {
+        const card = fromPlayer.hand[i];
+        if (collected + card.value <= amount) {
+          toRemove.push({ from: 'hand', index: i });
+          collected += card.value;
+        }
+      }
+    }
+    
+    // Remove cards from opponent and give to player
+    toRemove.reverse().forEach(({ from, index }) => {
+      if (from === 'bank') {
+        const takenCard = fromPlayer.bank.splice(index, 1)[0];
+        toPlayer.bank.push(takenCard);
+      } else {
+        const takenCard = fromPlayer.hand.splice(index, 1)[0];
+        toPlayer.bank.push(takenCard);
+      }
+    });
+  };
+
+  const cancelAction = useCallback(() => {
+    setGameState(prev => ({ 
+      ...prev, 
+      pendingSteal: undefined,
+      pendingTrade: undefined,
+      pendingRent: undefined
+    }));
   }, []);
 
   const bankCard = useCallback((playerId: string, cardId: string) => {
@@ -172,34 +290,94 @@ export const useGameLogic = () => {
     });
   }, []);
 
-  const handleActionCard = (card: GameCardData, gameState: GameState, playerIndex: number) => {
+  const handleActionCard = (card: GameCardData, gameState: GameState, playerIndex: number): 'pending' | 'complete' => {
     const player = gameState.players[playerIndex];
     const opponent = gameState.players[1 - playerIndex];
     
     switch (card.id) {
       case 'yalla-habibi':
         gameState.turnActions += 2; // Extra actions
-        break;
+        return 'complete';
+        
       case 'tea-time':
         // Draw 3 cards
         const drawnCards = gameState.deck.slice(0, 3);
         player.hand.push(...drawnCards);
         gameState.deck = gameState.deck.slice(3);
-        break;
-      case 'damascus-rose':
-        // Steal a property
+        return 'complete';
+        
+      case 'ta3feesh':
+        // Steal a property - need to select which one
         if (opponent.properties.length > 0) {
-          const stolenProperty = opponent.properties.pop()!;
-          player.properties.push(stolenProperty);
+          gameState.pendingSteal = {
+            cardId: card.id,
+            playerId: player.id,
+            targetCards: opponent.properties
+          };
+          return 'pending';
         }
-        break;
+        return 'complete';
+        
       case 'haflat-zawaj':
-        // Everyone gives you money from their bank
-        if (opponent.bank.length > 0) {
-          const stolenCard = opponent.bank.pop()!;
-          player.bank.push(stolenCard);
+        // Opponent pays 5K from bank/hand
+        const opponentValue = [...opponent.bank, ...opponent.hand];
+        let collected = 0;
+        const toRemove: { from: 'bank' | 'hand', index: number }[] = [];
+        
+        // Try to collect 5K from opponent
+        for (let i = 0; i < opponent.bank.length && collected < 5; i++) {
+          const card = opponent.bank[i];
+          if (collected + card.value <= 5) {
+            toRemove.push({ from: 'bank', index: i });
+            collected += card.value;
+          }
         }
-        break;
+        
+        // If not enough in bank, take from hand
+        if (collected < 5) {
+          for (let i = 0; i < opponent.hand.length && collected < 5; i++) {
+            const card = opponent.hand[i];
+            if (collected + card.value <= 5) {
+              toRemove.push({ from: 'hand', index: i });
+              collected += card.value;
+            }
+          }
+        }
+        
+        // Remove cards from opponent and give to player
+        toRemove.reverse().forEach(({ from, index }) => {
+          if (from === 'bank') {
+            const takenCard = opponent.bank.splice(index, 1)[0];
+            player.bank.push(takenCard);
+          } else {
+            const takenCard = opponent.hand.splice(index, 1)[0];
+            player.bank.push(takenCard);
+          }
+        });
+        return 'complete';
+        
+      case 'souk-shopping':
+        // Trade cards - need to select cards
+        gameState.pendingTrade = {
+          cardId: card.id,
+          playerId: player.id
+        };
+        return 'pending';
+        
+      case 'rent-red-yellow':
+      case 'rent-blue-green':
+      case 'rent-wild':
+        // Rent collection - need to select color
+        const rentCard = card as any;
+        gameState.pendingRent = {
+          cardId: card.id,
+          playerId: player.id,
+          availableColors: rentCard.rentColors || []
+        };
+        return 'pending';
+        
+      default:
+        return 'complete';
     }
   };
 
@@ -348,6 +526,9 @@ export const useGameLogic = () => {
     executeBotTurn,
     getCompletedSets,
     selectWildCardColor,
-    cancelWildCard
+    cancelWildCard,
+    selectStealTarget,
+    selectRentColor,
+    cancelAction
   };
 };

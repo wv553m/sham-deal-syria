@@ -13,6 +13,7 @@ export interface GameCardData {
   setSize?: number; // for property cards
   isWild?: boolean; // for wild cards
   assignedColor?: string; // for wild cards that have been assigned a color
+  rentColors?: string[]; // for rent cards
 }
 
 interface GameCardProps {
