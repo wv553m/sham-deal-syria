@@ -1,11 +1,14 @@
 import GameCard, { GameCardData } from "./GameCard";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface PropertyGroupsProps {
   properties: GameCardData[];
+  onChangeWildCardColor?: (cardId: string) => void;
+  canChangeColors?: boolean;
 }
 
-const PropertyGroups = ({ properties }: PropertyGroupsProps) => {
+const PropertyGroups = ({ properties, onChangeWildCardColor, canChangeColors = false }: PropertyGroupsProps) => {
   // Group properties by color, using assignedColor for wild cards
   const groupedProperties = properties.reduce((groups, card) => {
     // For wild cards that have been assigned a color, use assignedColor
@@ -79,7 +82,19 @@ const PropertyGroups = ({ properties }: PropertyGroupsProps) => {
             </div>
             <div className="grid grid-cols-2 gap-3">
               {group.map((card) => (
-                <GameCard key={card.id} card={card} className="w-32 h-48" />
+                <div key={card.id} className="relative">
+                  <GameCard card={card} className="w-32 h-48" />
+                  {canChangeColors && card.isWild && card.assignedColor && onChangeWildCardColor && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 text-xs px-2 py-1 h-6"
+                      onClick={() => onChangeWildCardColor(card.id)}
+                    >
+                      🔄
+                    </Button>
+                  )}
+                </div>
               ))}
             </div>
           </div>

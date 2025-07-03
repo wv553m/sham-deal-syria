@@ -28,7 +28,9 @@ const GameBoard = () => {
     cancelWildCard,
     selectStealTarget,
     selectRentColor,
-    cancelAction
+    cancelAction,
+    changeWildCardColor,
+    selectNewColor
   } = useGameLogic();
 
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
@@ -110,7 +112,11 @@ const GameBoard = () => {
             <div>
               <h4 className="font-semibold mb-2">Properties • الممتلكات:</h4>
               {player.properties.length > 0 ? (
-                <PropertyGroups properties={player.properties} />
+                <PropertyGroups 
+                  properties={player.properties} 
+                  onChangeWildCardColor={!player.isBot ? changeWildCardColor : undefined}
+                  canChangeColors={!player.isBot && isCurrentPlayer && gameState.turnActions > 0}
+                />
               ) : (
                 <div className="text-sm text-muted-foreground text-center py-4">
                   No properties yet
@@ -358,6 +364,15 @@ const GameBoard = () => {
           type="rent"
           availableColors={gameState.pendingRent.availableColors}
           onSelect={selectRentColor}
+          onCancel={cancelAction}
+        />
+      )}
+
+      {gameState.pendingColorChange && (
+        <ActionSelector
+          type="color-change"
+          currentColor={gameState.pendingColorChange.currentColor}
+          onSelect={selectNewColor}
           onCancel={cancelAction}
         />
       )}

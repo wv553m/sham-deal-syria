@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { GameCardData } from "@/components/GameCard";
 
 interface ActionSelectorProps {
-  type: 'steal' | 'trade' | 'rent';
+  type: 'steal' | 'trade' | 'rent' | 'color-change';
   availableCards?: GameCardData[];
   availableColors?: string[];
+  currentColor?: string;
   onSelect: (selection: any) => void;
   onCancel: () => void;
 }
@@ -15,6 +16,7 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
   type,
   availableCards = [],
   availableColors = [],
+  currentColor,
   onSelect,
   onCancel
 }) => {
@@ -103,6 +105,34 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
     </Card>
   );
 
+  const renderColorChangeSelector = () => (
+    <Card className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+      <div className="bg-background p-6 rounded-lg max-w-md w-full mx-4">
+        <CardHeader>
+          <CardTitle>غير لون الشاهين الدمشقي</CardTitle>
+          <CardDescription>
+            Current: {getColorName(currentColor || '')} | Choose new color
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {['red', 'blue', 'green', 'yellow'].filter(c => c !== currentColor).map((color) => (
+            <Button
+              key={color}
+              variant="outline"
+              className="w-full"
+              onClick={() => onSelect(color)}
+            >
+              {getColorName(color)}
+            </Button>
+          ))}
+          <Button variant="secondary" onClick={onCancel} className="w-full">
+            إلغاء Cancel
+          </Button>
+        </CardContent>
+      </div>
+    </Card>
+  );
+
   switch (type) {
     case 'steal':
       return renderStealSelector();
@@ -110,6 +140,8 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
       return renderTradeSelector();
     case 'rent':
       return renderRentSelector();
+    case 'color-change':
+      return renderColorChangeSelector();
     default:
       return null;
   }

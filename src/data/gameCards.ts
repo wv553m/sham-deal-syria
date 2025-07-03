@@ -146,21 +146,32 @@ export const propertyCards: GameCardData[] = [
 // Wild cards that can be used for any property set
 export const wildCards: GameCardData[] = [
   {
-    id: 'wild-damascus-rose',
+    id: 'wild-damascus-falcon-1',
     type: 'property',
-    title: 'Damascus Rose',
-    titleArabic: 'وردة دمشق',
+    title: 'Damascus Falcon',
+    titleArabic: 'الشاهين الدمشقي',
     description: 'Can be any property',
     value: 0,
-    icon: '🌹',
+    icon: '🦅',
     color: 'wild',
     isWild: true
   },
   {
-    id: 'wild-syrian-eagle',
+    id: 'wild-damascus-falcon-2',
     type: 'property',
-    title: 'Syrian Falcon',
-    titleArabic: 'الشاهين السوري',
+    title: 'Damascus Falcon',
+    titleArabic: 'الشاهين الدمشقي',
+    description: 'Can be any property',
+    value: 0,
+    icon: '🦅',
+    color: 'wild',
+    isWild: true
+  },
+  {
+    id: 'wild-damascus-falcon-3',
+    type: 'property',
+    title: 'Damascus Falcon',
+    titleArabic: 'الشاهين الدمشقي',
     description: 'Can be any property',
     value: 0,
     icon: '🦅',

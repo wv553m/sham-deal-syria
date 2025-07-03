@@ -36,6 +36,11 @@ export interface GameState {
     playerId: string;
     availableColors: string[];
   };
+  pendingColorChange?: {
+    cardId: string;
+    playerId: string;
+    currentColor: string;
+  };
 }
 
 export interface BotAction {

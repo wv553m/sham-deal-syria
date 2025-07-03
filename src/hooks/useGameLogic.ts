@@ -264,9 +264,49 @@ export const useGameLogic = () => {
       ...prev, 
       pendingSteal: undefined,
       pendingTrade: undefined,
-      pendingRent: undefined
+      pendingRent: undefined,
+      pendingColorChange: undefined
     }));
   }, []);
+
+  const changeWildCardColor = useCallback((cardId: string) => {
+    const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+    const wildCard = currentPlayer.properties.find(p => p.id === cardId && p.isWild && p.assignedColor);
+    
+    if (!wildCard || gameState.turnActions <= 0) return;
+    
+    setGameState(prev => ({
+      ...prev,
+      pendingColorChange: {
+        cardId: cardId,
+        playerId: currentPlayer.id,
+        currentColor: wildCard.assignedColor!
+      }
+    }));
+  }, [gameState]);
+
+  const selectNewColor = useCallback((newColor: string) => {
+    if (!gameState.pendingColorChange) return;
+    
+    setGameState(prev => {
+      const newState = { ...prev };
+      const playerIndex = newState.players.findIndex(p => p.id === gameState.pendingColorChange!.playerId);
+      
+      if (playerIndex === -1) return prev;
+      
+      const player = newState.players[playerIndex];
+      const cardIndex = player.properties.findIndex(c => c.id === gameState.pendingColorChange!.cardId);
+      
+      if (cardIndex !== -1) {
+        newState.players[playerIndex].properties[cardIndex].assignedColor = newColor;
+        newState.turnActions--;
+      }
+      
+      newState.pendingColorChange = undefined;
+      
+      return newState;
+    });
+  }, [gameState.pendingColorChange]);
 
   const bankCard = useCallback((playerId: string, cardId: string) => {
     setGameState(prev => {
@@ -542,6 +582,8 @@ export const useGameLogic = () => {
     cancelWildCard,
     selectStealTarget,
     selectRentColor,
-    cancelAction
+    cancelAction,
+    changeWildCardColor,
+    selectNewColor
   };
 };
