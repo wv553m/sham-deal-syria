@@ -259,37 +259,49 @@ export const useGameLogic = () => {
   }, []);
 
   const executeBotTurn = useCallback(async () => {
-    const botPlayer = gameState.players.find(p => p.isBot);
-    const humanPlayer = gameState.players.find(p => !p.isBot);
-    
-    if (!botPlayer || !humanPlayer || gameState.currentPlayerIndex !== 1) return;
-    
-    let actionsRemaining = gameState.turnActions;
-    
-    while (actionsRemaining > 0) {
-      const action = getBotAction(botPlayer, humanPlayer);
+    setGameState(currentState => {
+      const botPlayer = currentState.players.find(p => p.isBot);
+      const humanPlayer = currentState.players.find(p => !p.isBot);
       
-      if (action.type === 'end_turn') break;
+      if (!botPlayer || !humanPlayer || currentState.currentPlayerIndex !== 1) return currentState;
       
-      if (action.cardId) {
-        playCard(botPlayer.id, action.cardId);
-        const card = botPlayer.hand.find(c => c.id === action.cardId);
+      const executeBotActions = async () => {
+        while (gameState.turnActions > 0 && gameState.currentPlayerIndex === 1) {
+          const currentBot = gameState.players.find(p => p.isBot);
+          const currentHuman = gameState.players.find(p => !p.isBot);
+          
+          if (!currentBot || !currentHuman) break;
+          
+          const action = getBotAction(currentBot, currentHuman);
+          
+          if (action.type === 'end_turn' || gameState.turnActions <= 0) break;
+          
+          if (action.cardId) {
+            const card = currentBot.hand.find(c => c.id === action.cardId);
+            playCard(currentBot.id, action.cardId);
+            
+            // Show what bot played
+            setTimeout(() => {
+              toast({
+                title: `Abu Fadi played: ${card?.title}`,
+                description: card?.titleArabic || "البوت لعب بطاقة",
+              });
+            }, 1000);
+          }
+          
+          // Wait longer between moves
+          await new Promise(resolve => setTimeout(resolve, 3000));
+        }
         
+        // End turn after all actions
         setTimeout(() => {
-          toast({
-            title: `Abu Fadi played: ${card?.title}`,
-            description: card?.titleArabic || "البوت لعب بطاقة",
-          });
-        }, 1000);
-      }
+          endTurn();
+        }, 2000);
+      };
       
-      actionsRemaining--;
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Delay for realism
-    }
-    
-    setTimeout(() => {
-      endTurn();
-    }, 2000);
+      executeBotActions();
+      return currentState;
+    });
   }, [gameState, getBotAction, playCard, endTurn, toast]);
 
   return {
