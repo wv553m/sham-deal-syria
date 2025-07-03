@@ -1,85 +1,171 @@
 import { GameCardData } from "@/components/GameCard";
 
+// Property sets: Red (4 cards), Blue (3 cards), Green (2 cards), Yellow (3 cards)
 export const propertyCards: GameCardData[] = [
+  // Red Set (4 cards needed)
   {
     id: 'old-damascus',
     type: 'property',
     title: 'Old Damascus',
     titleArabic: 'دمشق القديمة',
-    description: 'The ancient heart of Syria',
+    description: 'Heart of Syria',
     value: 4,
     icon: '🏛️',
-    color: 'terracotta'
-  },
-  {
-    id: 'aleppo-citadel',
-    type: 'property', 
-    title: 'Aleppo Citadel',
-    titleArabic: 'قلعة حلب',
-    description: 'Medieval fortress of the north',
-    value: 3,
-    icon: '🏰',
-    color: 'damascus-blue'
-  },
-  {
-    id: 'krak-des-chevaliers',
-    type: 'property',
-    title: 'Krak des Chevaliers',
-    titleArabic: 'قلعة الحصن',
-    description: 'Crusader castle masterpiece',
-    value: 3,
-    icon: '⚔️',
-    color: 'olive-green'
-  },
-  {
-    id: 'palmyra',
-    type: 'property',
-    title: 'Palmyra',
-    titleArabic: 'تدمر',
-    description: 'Desert queen of antiquity',
-    value: 4,
-    icon: '🏺',
-    color: 'golden-sand'
+    color: 'red',
+    setSize: 4
   },
   {
     id: 'bosra-amphitheater',
     type: 'property',
     title: 'Bosra Theater',
     titleArabic: 'مسرح بصرى',
-    description: 'Roman theater marvel',
+    description: 'Roman marvel',
     value: 2,
     icon: '🎭',
-    color: 'terracotta'
-  },
-  {
-    id: 'umayyad-mosque',
-    type: 'property',
-    title: 'Umayyad Mosque',
-    titleArabic: 'الجامع الأموي',
-    description: 'Sacred architectural gem',
-    value: 4,
-    icon: '🕌',
-    color: 'damascus-blue'
-  },
-  {
-    id: 'straight-street',
-    type: 'property',
-    title: 'Straight Street',
-    titleArabic: 'الشارع المستقيم',
-    description: 'Biblical Damascus road',
-    value: 2,
-    icon: '🛤️',
-    color: 'olive-green'
+    color: 'red',
+    setSize: 4
   },
   {
     id: 'al-azm-palace',
     type: 'property',
     title: 'Al-Azm Palace',
     titleArabic: 'قصر العظم',
-    description: 'Ottoman architectural beauty',
+    description: 'Ottoman beauty',
     value: 3,
     icon: '🏮',
-    color: 'golden-sand'
+    color: 'red',
+    setSize: 4
+  },
+  {
+    id: 'damascus-citadel',
+    type: 'property',
+    title: 'Damascus Citadel',
+    titleArabic: 'قلعة دمشق',
+    description: 'Ancient fortress',
+    value: 3,
+    icon: '🏰',
+    color: 'red',
+    setSize: 4
+  },
+  
+  // Blue Set (3 cards needed)
+  {
+    id: 'aleppo-citadel',
+    type: 'property', 
+    title: 'Aleppo Citadel',
+    titleArabic: 'قلعة حلب',
+    description: 'Northern fortress',
+    value: 3,
+    icon: '🏰',
+    color: 'blue',
+    setSize: 3
+  },
+  {
+    id: 'umayyad-mosque',
+    type: 'property',
+    title: 'Umayyad Mosque',
+    titleArabic: 'الجامع الأموي',
+    description: 'Sacred gem',
+    value: 4,
+    icon: '🕌',
+    color: 'blue',
+    setSize: 3
+  },
+  {
+    id: 'mari-ruins',
+    type: 'property',
+    title: 'Mari Ruins',
+    titleArabic: 'أطلال ماري',
+    description: 'Ancient kingdom',
+    value: 2,
+    icon: '🏺',
+    color: 'blue',
+    setSize: 3
+  },
+  
+  // Green Set (2 cards needed)
+  {
+    id: 'krak-des-chevaliers',
+    type: 'property',
+    title: 'Krak des Chevaliers',
+    titleArabic: 'قلعة الحصن',
+    description: 'Crusader castle',
+    value: 3,
+    icon: '⚔️',
+    color: 'green',
+    setSize: 2
+  },
+  {
+    id: 'straight-street',
+    type: 'property',
+    title: 'Straight Street',
+    titleArabic: 'الشارع المستقيم',
+    description: 'Biblical road',
+    value: 2,
+    icon: '🛤️',
+    color: 'green',
+    setSize: 2
+  },
+  
+  // Yellow Set (3 cards needed)
+  {
+    id: 'palmyra',
+    type: 'property',
+    title: 'Palmyra',
+    titleArabic: 'تدمر',
+    description: 'Desert queen',
+    value: 4,
+    icon: '🏺',
+    color: 'yellow',
+    setSize: 3
+  },
+  {
+    id: 'dead-cities',
+    type: 'property',
+    title: 'Dead Cities',
+    titleArabic: 'المدن الميتة',
+    description: 'Byzantine ruins',
+    value: 3,
+    icon: '🏛️',
+    color: 'yellow',
+    setSize: 3
+  },
+  {
+    id: 'saladin-castle',
+    type: 'property',
+    title: 'Saladin Castle',
+    titleArabic: 'قلعة صلاح الدين',
+    description: 'Fortress of honor',
+    value: 2,
+    icon: '🏰',
+    color: 'yellow',
+    setSize: 3
+  }
+];
+
+// Wild cards that can be used for any property set
+export const wildCards: GameCardData[] = [
+  {
+    id: 'wild-damascus-rose',
+    type: 'property',
+    title: 'Damascus Rose',
+    titleArabic: 'وردة دمشق',
+    description: 'Can be any property',
+    value: 0,
+    icon: '🌹',
+    color: 'wild',
+    isWild: true
+  },
+  {
+    id: 'wild-syrian-eagle',
+    type: 'property',
+    title: 'Syrian Eagle',
+    titleArabic: 'النسر السوري',
+    description: 'Can be any property',
+    value: 0,
+    icon: '🦅',
+    color: 'wild',
+    isWild: true
   }
 ];
 
@@ -89,80 +175,45 @@ export const actionCards: GameCardData[] = [
     type: 'action',
     title: 'Yalla Habibi!',
     titleArabic: 'يلا حبيبي',
-    description: 'Take another turn, my friend!',
+    description: 'Extra turn!',
     icon: '🏃‍♂️',
-  },
-  {
-    id: 'shawarma-break',
-    type: 'action',
-    title: 'Shawarma Break',
-    titleArabic: 'استراحة شاورما',
-    description: 'Everyone skips next turn to eat',
-    icon: '🌯',
+    value: 1
   },
   {
     id: 'damascus-rose',
     type: 'action',
     title: 'Damascus Rose',
     titleArabic: 'وردة دمشق',
-    description: 'Steal a property with charm',
+    description: 'Steal property',
     icon: '🌹',
-  },
-  {
-    id: 'abu-hassan-taxi',
-    type: 'action',
-    title: 'Abu Hassan\'s Taxi',
-    titleArabic: 'تاكسي أبو حسن',
-    description: 'Move any card to your hand',
-    icon: '🚕',
-  },
-  {
-    id: 'maqluba-surprise',
-    type: 'action',
-    title: 'Maqluba Surprise',
-    titleArabic: 'مفاجأة مقلوبة',
-    description: 'Flip the game upside down!',
-    icon: '🍲',
+    value: 3
   },
   {
     id: 'tea-time',
     type: 'action',
     title: 'Tea Time',
     titleArabic: 'وقت الشاي',
-    description: 'Draw 3 cards while sipping',
+    description: 'Draw 3 cards',
     icon: '🍵',
+    value: 1
   },
   {
     id: 'haflat-zawaj',
     type: 'action',
     title: 'Wedding Party',
     titleArabic: 'حفلة زواج',
-    description: 'Everyone gives you money!',
+    description: 'Collect money',
     icon: '💒',
+    value: 4
   },
   {
-    id: 'traffic-jam',
-    type: 'action',
-    title: 'Damascus Traffic',
-    titleArabic: 'زحمة دمشق',
-    description: 'No one can play for 1 round',
-    icon: '🚦',
-  },
-  {
-    id: 'hajjeh-um-mahmoud',
-    type: 'action',
-    title: 'Hajjeh Um Mahmoud',
-    titleArabic: 'الحاجة أم محمود',
-    description: 'The neighborhood mom helps you',
-    icon: '👵',
-  },
-  {
-    id: 'souk-al-hamidiyeh',
+    id: 'souk-shopping',
     type: 'action',
     title: 'Souk Shopping',
     titleArabic: 'تسوق في السوق',
-    description: 'Trade cards with anyone',
+    description: 'Trade cards',
     icon: '🛍️',
+    value: 2
   }
 ];
 
@@ -219,6 +270,7 @@ export const moneyCards: GameCardData[] = [
 
 export const allCards: GameCardData[] = [
   ...propertyCards,
+  ...wildCards,
   ...actionCards,
   ...moneyCards
 ];

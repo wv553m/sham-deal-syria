@@ -6,7 +6,7 @@ export interface Player {
   nameArabic?: string;
   hand: GameCardData[];
   properties: GameCardData[];
-  money: number;
+  bank: GameCardData[]; // cards deposited as money
   isBot: boolean;
 }
 
@@ -17,7 +17,7 @@ export interface GameState {
   discardPile: GameCardData[];
   gamePhase: 'setup' | 'playing' | 'ended';
   winner?: Player;
-  turnActions: number; // remaining actions for current turn
+  turnActions: number; // remaining actions for current turn (max 3)
 }
 
 export interface BotAction {

@@ -5,6 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import GameCard, { GameCardData } from "./GameCard";
 import GameRules from "./GameRules";
+import BankArea from "./BankArea";
+import PropertyGroups from "./PropertyGroups";
 import { allCards, propertyCards, actionCards, moneyCards } from "@/data/gameCards";
 import { useGameLogic } from "@/hooks/useGameLogic";
 import { Player } from "@/types/game";
@@ -16,6 +18,7 @@ const GameBoard = () => {
     initializeGame, 
     drawCards, 
     playCard, 
+    bankCard,
     endTurn, 
     executeBotTurn,
     getCompletedSets 
@@ -36,33 +39,22 @@ const GameBoard = () => {
     }
   }, [gameState.currentPlayerIndex, gameState.gamePhase, currentPlayer, executeBotTurn, gameState.turnActions]);
 
-  const handleCardClick = (cardId: string) => {
-    if (!isHumanTurn || gameState.turnActions <= 0) return;
-    
-    if (selectedCards.includes(cardId)) {
-      setSelectedCards(selectedCards.filter(id => id !== cardId));
-    } else {
-      setSelectedCards([...selectedCards, cardId]);
-    }
+  const handleCardDragStart = (e: React.DragEvent, cardId: string) => {
+    e.dataTransfer.setData('text/plain', cardId);
   };
 
-  const handlePlaySelectedCards = () => {
-    if (!humanPlayer || !isHumanTurn) return;
-    
-    selectedCards.forEach(cardId => {
-      playCard(humanPlayer.id, cardId);
-    });
-    setSelectedCards([]);
+  const handlePlayCard = (cardId: string) => {
+    if (!humanPlayer || !isHumanTurn || gameState.turnActions <= 0) return;
+    playCard(humanPlayer.id, cardId);
   };
 
-  const handleDrawCards = () => {
-    if (!humanPlayer || !isHumanTurn) return;
-    drawCards(humanPlayer.id, 2);
+  const handleBankCard = (cardId: string) => {
+    if (!humanPlayer || !isHumanTurn || gameState.turnActions <= 0) return;
+    bankCard(humanPlayer.id, cardId);
   };
 
-  const handleEndTurn = () => {
-    endTurn();
-    setSelectedCards([]);
+  const getBankValue = (player: Player) => {
+    return player.bank.reduce((sum, card) => sum + (card.value || 0), 0);
   };
 
   const renderPlayerArea = (player: Player, isCurrentPlayer: boolean) => {
@@ -82,53 +74,68 @@ const GameBoard = () => {
               {player.isBot && <Badge variant="secondary" className="ml-2">🤖 Bot</Badge>}
             </div>
             <div className="text-right">
-              <div className="text-sm text-muted-foreground">Money: {player.money}K</div>
+              <div className="text-sm text-muted-foreground">Bank: {getBankValue(player)}K</div>
               <div className="text-sm text-muted-foreground">Sets: {completedSets}/3</div>
               <div className="text-sm text-muted-foreground">Cards: {player.hand.length}</div>
             </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Properties */}
-          {player.properties.length > 0 && (
-            <div className="mb-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Bank */}
+            <BankArea 
+              cards={player.bank} 
+              onCardDrop={!player.isBot ? handleBankCard : undefined}
+              className="h-fit"
+            />
+            
+            {/* Properties */}
+            <div>
               <h4 className="font-semibold mb-2">Properties • الممتلكات:</h4>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                {player.properties.map((card) => (
-                  <GameCard key={card.id} card={card} className="w-20 h-28" />
-                ))}
-              </div>
+              {player.properties.length > 0 ? (
+                <PropertyGroups properties={player.properties} />
+              ) : (
+                <div className="text-sm text-muted-foreground text-center py-4">
+                  No properties yet
+                </div>
+              )}
             </div>
-          )}
+          </div>
           
           {/* Hand (only show for human player or face-down for bot) */}
-          {!player.isBot ? (
-            <div>
-              <h4 className="font-semibold mb-2">Your Hand • يدك:</h4>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2">
-                {player.hand.map((card) => (
-                  <GameCard
-                    key={card.id}
-                    card={card}
-                    isSelected={selectedCards.includes(card.id)}
-                    onClick={() => handleCardClick(card.id)}
-                    className="w-20 h-28"
-                  />
-                ))}
+          <div className="mt-4">
+            {!player.isBot ? (
+              <div>
+                <h4 className="font-semibold mb-2">Your Hand • يدك:</h4>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2">
+                  {player.hand.map((card) => (
+                    <div
+                      key={card.id}
+                      draggable
+                      onDragStart={(e) => handleCardDragStart(e, card.id)}
+                      onClick={() => handlePlayCard(card.id)}
+                    >
+                      <GameCard
+                        card={card}
+                        className="w-20 h-28 hover:scale-105 transition-transform"
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ) : (
-            <div>
-              <h4 className="font-semibold mb-2">Bot Hand • يد البوت:</h4>
-              <div className="grid grid-cols-7 gap-2">
-                {Array.from({ length: player.hand.length }).map((_, index) => (
-                  <div key={index} className="w-20 h-28 bg-gradient-syrian rounded-lg flex items-center justify-center">
-                    <span className="text-2xl">🏛️</span>
-                  </div>
-                ))}
+            ) : (
+              <div>
+                <h4 className="font-semibold mb-2">Bot Hand • يد البوت:</h4>
+                <div className="grid grid-cols-7 gap-2">
+                  {Array.from({ length: player.hand.length }).map((_, index) => (
+                    <div key={index} className="w-20 h-28 bg-gradient-syrian rounded-lg flex items-center justify-center">
+                      <span className="text-2xl">🏛️</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </CardContent>
       </Card>
     );
@@ -231,33 +238,18 @@ const GameBoard = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex gap-4 items-center flex-wrap">
-                  {isHumanTurn && (
-                    <>
-                      <Button 
-                        onClick={handleDrawCards}
-                        disabled={gameState.deck.length < 2}
-                        className="bg-gradient-damascus text-white"
-                      >
-                        📥 Draw 2 Cards
-                      </Button>
-                      <Button 
-                        onClick={handlePlaySelectedCards}
-                        disabled={selectedCards.length === 0 || gameState.turnActions <= 0}
-                        className="bg-gradient-syrian text-primary-foreground"
-                      >
-                        ▶️ Play Selected ({selectedCards.length})
-                      </Button>
-                      <Button 
-                        onClick={handleEndTurn}
-                        variant="outline"
-                        className="border-terracotta text-terracotta hover:bg-terracotta hover:text-white"
-                      >
-                        ⏭️ End Turn
-                      </Button>
-                    </>
+                  {isHumanTurn && gameState.turnActions === 0 && (
+                    <Button 
+                      onClick={endTurn}
+                      className="bg-gradient-syrian text-primary-foreground"
+                    >
+                      ⏭️ End Turn
+                    </Button>
                   )}
                   <div className="text-sm text-muted-foreground">
-                    Deck: {gameState.deck.length} cards
+                    Deck: {gameState.deck.length} cards • 
+                    Click cards to play as property/action • 
+                    Drag to bank for money
                   </div>
                 </div>
               </CardContent>

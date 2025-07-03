@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { GameState, Player, BotAction } from "@/types/game";
 import { GameCardData } from "@/components/GameCard";
-import { allCards } from "@/data/gameCards";
+import { allCards, wildCards } from "@/data/gameCards";
 import { useToast } from "@/hooks/use-toast";
 
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -19,7 +19,7 @@ const createBot = (): Player => ({
   nameArabic: 'أبو فادي',
   hand: [],
   properties: [],
-  money: 0,
+  bank: [],
   isBot: true
 });
 
@@ -29,7 +29,7 @@ const createHumanPlayer = (): Player => ({
   nameArabic: 'أنت',
   hand: [],
   properties: [],
-  money: 0,
+  bank: [],
   isBot: false
 });
 
@@ -104,14 +104,34 @@ export const useGameLogic = () => {
       // Handle different card types
       if (card.type === 'property') {
         player.properties.push(card);
-      } else if (card.type === 'money') {
-        player.money += card.value || 0;
       } else if (card.type === 'action') {
         // Handle action card effects
         handleActionCard(card, newState, playerIndex);
       }
       
       newState.discardPile.push(card);
+      newState.turnActions--;
+      
+      return newState;
+    });
+  }, []);
+
+  const bankCard = useCallback((playerId: string, cardId: string) => {
+    setGameState(prev => {
+      const newState = { ...prev };
+      const playerIndex = newState.players.findIndex(p => p.id === playerId);
+      
+      if (playerIndex === -1 || newState.turnActions <= 0) return prev;
+      
+      const player = newState.players[playerIndex];
+      const cardIndex = player.hand.findIndex(c => c.id === cardId);
+      
+      if (cardIndex === -1) return prev;
+      
+      const card = player.hand[cardIndex];
+      player.hand.splice(cardIndex, 1);
+      player.bank.push(card);
+      
       newState.turnActions--;
       
       return newState;
@@ -140,10 +160,10 @@ export const useGameLogic = () => {
         }
         break;
       case 'haflat-zawaj':
-        // Everyone gives you money
-        if (opponent.money >= 2) {
-          opponent.money -= 2;
-          player.money += 2;
+        // Everyone gives you money from their bank
+        if (opponent.bank.length > 0) {
+          const stolenCard = opponent.bank.pop()!;
+          player.bank.push(stolenCard);
         }
         break;
     }
@@ -167,11 +187,11 @@ export const useGameLogic = () => {
       newState.currentPlayerIndex = (newState.currentPlayerIndex + 1) % newState.players.length;
       newState.turnActions = 3;
       
-      // If it's bot's turn, draw cards for bot
-      if (newState.players[newState.currentPlayerIndex].isBot) {
-        const botPlayer = newState.players[newState.currentPlayerIndex];
+      // Auto-draw 2 cards at start of turn
+      const nextPlayer = newState.players[newState.currentPlayerIndex];
+      if (newState.deck.length >= 2) {
         const drawnCards = newState.deck.slice(0, 2);
-        botPlayer.hand.push(...drawnCards);
+        nextPlayer.hand.push(...drawnCards);
         newState.deck = newState.deck.slice(2);
       }
       
@@ -180,15 +200,40 @@ export const useGameLogic = () => {
   }, []);
 
   const getCompletedSets = (properties: GameCardData[]): number => {
-    const colorGroups: { [key: string]: number } = {};
+    const colorGroups: { [key: string]: GameCardData[] } = {};
     
+    // Group properties by color (exclude wild cards from grouping)
     properties.forEach(prop => {
-      if (prop.color) {
-        colorGroups[prop.color] = (colorGroups[prop.color] || 0) + 1;
+      if (prop.color && !prop.isWild) {
+        if (!colorGroups[prop.color]) {
+          colorGroups[prop.color] = [];
+        }
+        colorGroups[prop.color].push(prop);
       }
     });
     
-    return Object.values(colorGroups).filter(count => count >= 2).length;
+    // Count wild cards
+    const wildCount = properties.filter(p => p.isWild).length;
+    
+    // Check completed sets
+    let completedSets = 0;
+    let wildCardsUsed = 0;
+    
+    Object.values(colorGroups).forEach(group => {
+      const setSize = group[0]?.setSize || 2;
+      const cardsNeeded = setSize - group.length;
+      
+      if (cardsNeeded <= 0) {
+        // Set is complete without wild cards
+        completedSets++;
+      } else if (cardsNeeded <= (wildCount - wildCardsUsed)) {
+        // Set can be completed with wild cards
+        completedSets++;
+        wildCardsUsed += cardsNeeded;
+      }
+    });
+    
+    return completedSets;
   };
 
   const getBotAction = useCallback((botPlayer: Player, opponent: Player): BotAction => {
@@ -252,6 +297,7 @@ export const useGameLogic = () => {
     initializeGame,
     drawCards,
     playCard,
+    bankCard,
     endTurn,
     executeBotTurn,
     getCompletedSets

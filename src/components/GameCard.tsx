@@ -10,6 +10,8 @@ export interface GameCardData {
   color?: string;
   icon?: string;
   image?: string;
+  setSize?: number; // for property cards
+  isWild?: boolean; // for wild cards
 }
 
 interface GameCardProps {
@@ -22,13 +24,50 @@ interface GameCardProps {
 
 const GameCard = ({ card, isSelected, isFlipped, onClick, className }: GameCardProps) => {
   const getCardStyles = () => {
-    switch (card.type) {
-      case 'property':
+    if (card.type === 'property') {
+      if (card.isWild) {
         return {
-          background: 'bg-gradient-syrian',
-          border: 'border-terracotta',
-          text: 'text-primary-foreground'
+          background: 'bg-gradient-to-br from-purple-500 to-pink-500',
+          border: 'border-purple-400',
+          text: 'text-white'
         };
+      }
+      
+      switch (card.color) {
+        case 'red':
+          return {
+            background: 'bg-gradient-to-br from-red-500 to-red-600',
+            border: 'border-red-400',
+            text: 'text-white'
+          };
+        case 'blue':
+          return {
+            background: 'bg-gradient-to-br from-blue-500 to-blue-600',
+            border: 'border-blue-400',
+            text: 'text-white'
+          };
+        case 'green':
+          return {
+            background: 'bg-gradient-to-br from-green-500 to-green-600',
+            border: 'border-green-400',
+            text: 'text-white'
+          };
+        case 'yellow':
+          return {
+            background: 'bg-gradient-to-br from-yellow-500 to-yellow-600',
+            border: 'border-yellow-400',
+            text: 'text-white'
+          };
+        default:
+          return {
+            background: 'bg-gradient-syrian',
+            border: 'border-terracotta',
+            text: 'text-primary-foreground'
+          };
+      }
+    }
+    
+    switch (card.type) {
       case 'action':
         return {
           background: 'bg-gradient-damascus',
@@ -74,9 +113,9 @@ const GameCard = ({ card, isSelected, isFlipped, onClick, className }: GameCardP
       )}>
         {/* Header */}
         <div className="text-center">
-          <div className="text-xs font-bold mb-1">{card.title}</div>
+          <div className="text-[10px] font-bold mb-1 leading-tight">{card.title}</div>
           {card.titleArabic && (
-            <div className="text-xs opacity-80 font-medium" dir="rtl">
+            <div className="text-[9px] opacity-80 font-medium leading-tight" dir="rtl">
               {card.titleArabic}
             </div>
           )}
@@ -85,20 +124,25 @@ const GameCard = ({ card, isSelected, isFlipped, onClick, className }: GameCardP
         {/* Icon/Image */}
         <div className="flex-1 flex items-center justify-center">
           {card.icon && (
-            <div className="text-3xl">{card.icon}</div>
+            <div className="text-2xl">{card.icon}</div>
           )}
         </div>
 
         {/* Value/Description */}
         <div className="text-center">
-          {card.value && (
-            <div className="text-lg font-bold">
+          {card.value !== undefined && (
+            <div className="text-sm font-bold">
               {card.type === 'money' ? `${card.value}K` : card.value}
             </div>
           )}
           {card.description && (
-            <div className="text-xs opacity-80 line-clamp-2">
+            <div className="text-[8px] opacity-80 leading-tight">
               {card.description}
+            </div>
+          )}
+          {card.setSize && (
+            <div className="text-[8px] opacity-60 mt-1">
+              Set: {card.setSize} cards
             </div>
           )}
         </div>
