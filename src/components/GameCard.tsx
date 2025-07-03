@@ -96,7 +96,7 @@ const GameCard = ({ card, isSelected, isFlipped, onClick, className }: GameCardP
       className={cn(
         "relative w-36 h-56 rounded-lg border-2 cursor-pointer transition-all duration-300",
         "hover:animate-card-hover hover:shadow-card-hover",
-        "transform-gpu perspective-1000",
+        "transform-gpu perspective-1000 overflow-hidden",
         styles.background,
         styles.border,
         isSelected && "ring-4 ring-accent ring-opacity-50 scale-105",
@@ -107,48 +107,48 @@ const GameCard = ({ card, isSelected, isFlipped, onClick, className }: GameCardP
     >
       {/* Card Front */}
       <div className={cn(
-        "absolute inset-0 p-3 flex flex-col justify-between rounded-lg",
+        "absolute inset-2 flex flex-col h-[calc(100%-16px)]",
         styles.text,
         isFlipped && "opacity-0"
       )}>
         {/* Header */}
-        <div className="text-center mb-1">
-          <div className="text-xs font-bold mb-1 leading-tight">{card.title}</div>
+        <div className="text-center mb-2 flex-shrink-0">
+          <div className="text-[10px] font-bold leading-tight truncate px-1">{card.title}</div>
           {card.titleArabic && (
-            <div className="text-[10px] opacity-80 font-medium leading-tight" dir="rtl">
+            <div className="text-[8px] opacity-80 font-medium leading-tight truncate px-1" dir="rtl">
               {card.titleArabic}
             </div>
           )}
         </div>
 
         {/* Icon/Image */}
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center min-h-8">
           {card.icon && (
-            <div className="text-2xl">{card.icon}</div>
+            <div className="text-xl">{card.icon}</div>
           )}
         </div>
 
         {/* Value/Description */}
-        <div className="text-center space-y-1">
+        <div className="text-center flex-shrink-0 space-y-1 overflow-hidden">
           {card.value !== undefined && (
-            <div className="text-base font-bold">
+            <div className="text-sm font-bold">
               {card.type === 'money' ? `${card.value}K` : card.value}
             </div>
           )}
           {card.description && (
-            <div className="text-[9px] opacity-80 leading-tight px-1">
+            <div className="text-[7px] opacity-80 leading-tight line-clamp-2 px-1">
               {card.description}
             </div>
           )}
           {card.setSize && (
-            <div className="text-[8px] opacity-60">
+            <div className="text-[7px] opacity-60 truncate">
               Set: {card.setSize}
             </div>
           )}
         </div>
 
         {/* Type indicator */}
-        <div className="absolute top-1 right-1">
+        <div className="absolute -top-1 -right-1">
           <div className={cn(
             "w-2 h-2 rounded-full",
             card.type === 'property' && "bg-terracotta",
