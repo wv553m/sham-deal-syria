@@ -34,13 +34,18 @@ const GameBoard = () => {
 
   // Handle bot turns with proper sequencing
   useEffect(() => {
-    if (gameState.gamePhase === 'playing' && currentPlayer?.isBot && gameState.turnActions > 0) {
+    if (gameState.gamePhase === 'playing' && 
+        currentPlayer?.isBot && 
+        gameState.turnActions > 0 && 
+        gameState.currentPlayerIndex === 1) {
+      
+      console.log(`Bot turn triggered, actions: ${gameState.turnActions}`);
       const timer = setTimeout(() => {
         executeBotTurn();
       }, 2000); // 2 second delay between each bot action
       return () => clearTimeout(timer);
     }
-  }, [gameState.currentPlayerIndex, gameState.gamePhase, gameState.turnActions, currentPlayer, executeBotTurn]);
+  }, [gameState.currentPlayerIndex, gameState.gamePhase, gameState.turnActions, executeBotTurn]);
 
   const handleCardDragStart = (e: React.DragEvent, cardId: string) => {
     e.dataTransfer.setData('text/plain', cardId);

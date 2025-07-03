@@ -294,15 +294,13 @@ export const useGameLogic = () => {
 
   const executeBotTurn = useCallback(() => {
     // Check if it's bot's turn and has actions left
-    if (gameState.currentPlayerIndex !== 1 || gameState.turnActions <= 0) {
-      endTurn();
-      return;
-    }
+    if (gameState.currentPlayerIndex !== 1) return;
     
     const botPlayer = gameState.players.find(p => p.isBot);
     const humanPlayer = gameState.players.find(p => !p.isBot);
     
-    if (!botPlayer || !humanPlayer) {
+    if (!botPlayer || !humanPlayer || gameState.turnActions <= 0) {
+      console.log("Bot ending turn - no actions left or no player found");
       endTurn();
       return;
     }
@@ -310,6 +308,7 @@ export const useGameLogic = () => {
     const action = getBotAction(botPlayer, humanPlayer);
     
     if (action.type === 'end_turn' || !action.cardId) {
+      console.log("Bot ending turn - no valid action");
       endTurn();
       return;
     }
@@ -317,20 +316,26 @@ export const useGameLogic = () => {
     // Execute one action
     const card = botPlayer.hand.find(c => c.id === action.cardId);
     if (card) {
+      console.log(`Bot playing card: ${card.title}, Actions before: ${gameState.turnActions}`);
       playCard(botPlayer.id, action.cardId);
       
       toast({
         title: `Abu Fadi played: ${card.title}`,
         description: card.titleArabic || "البوت لعب بطاقة",
       });
+      
+      // Check if bot should end turn after this action
+      setTimeout(() => {
+        console.log(`Actions after bot play: ${gameState.turnActions - 1}`);
+        if (gameState.turnActions <= 1) { // Will be 0 after this action
+          console.log("Bot ending turn - actions will be 0");
+          setTimeout(() => endTurn(), 500);
+        }
+      }, 100);
+    } else {
+      console.log("Bot ending turn - card not found");
+      endTurn();
     }
-    
-    // Check if turn should end after this action
-    setTimeout(() => {
-      if (gameState.turnActions <= 0) {
-        endTurn();
-      }
-    }, 100); // Very short delay to let state update
   }, [gameState, getBotAction, playCard, endTurn, toast]);
 
   return {
