@@ -22,6 +22,8 @@ const PropertyGroups = ({ properties }: PropertyGroupsProps) => {
     const setSize = group[0]?.setSize || 2;
     const isComplete = group.length >= setSize;
     
+    console.log(`Group ${color}: ${group.length}/${setSize} cards, Complete: ${isComplete}`);
+    
     return {
       current: group.length,
       needed: setSize,

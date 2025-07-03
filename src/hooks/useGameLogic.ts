@@ -103,7 +103,16 @@ export const useGameLogic = () => {
       
       // Handle different card types
       if (card.type === 'property') {
+        // Group properties by color for better organization
+        const existingGroup = player.properties.filter(p => 
+          !p.isWild && p.color === card.color
+        );
+        
+        // Add to properties array
         player.properties.push(card);
+        
+        console.log(`Property added: ${card.title}, Color: ${card.color}, Set size: ${card.setSize}`);
+        console.log(`Current ${card.color} properties:`, existingGroup.length + 1);
       } else if (card.type === 'action') {
         // Handle action card effects
         handleActionCard(card, newState, playerIndex);
@@ -111,6 +120,8 @@ export const useGameLogic = () => {
       
       newState.discardPile.push(card);
       newState.turnActions--;
+      
+      console.log(`Turn actions remaining: ${newState.turnActions}`);
       
       return newState;
     });
@@ -259,49 +270,41 @@ export const useGameLogic = () => {
   }, []);
 
   const executeBotTurn = useCallback(async () => {
-    setGameState(currentState => {
-      const botPlayer = currentState.players.find(p => p.isBot);
-      const humanPlayer = currentState.players.find(p => !p.isBot);
+    if (gameState.currentPlayerIndex !== 1 || gameState.turnActions <= 0) return;
+    
+    const botPlayer = gameState.players.find(p => p.isBot);
+    const humanPlayer = gameState.players.find(p => !p.isBot);
+    
+    if (!botPlayer || !humanPlayer) return;
+    
+    // Execute one action at a time
+    const action = getBotAction(botPlayer, humanPlayer);
+    
+    if (action.type === 'end_turn' || gameState.turnActions <= 0) {
+      endTurn();
+      return;
+    }
+    
+    if (action.cardId) {
+      const card = botPlayer.hand.find(c => c.id === action.cardId);
+      playCard(botPlayer.id, action.cardId);
       
-      if (!botPlayer || !humanPlayer || currentState.currentPlayerIndex !== 1) return currentState;
+      toast({
+        title: `Abu Fadi played: ${card?.title}`,
+        description: card?.titleArabic || "البوت لعب بطاقة",
+      });
       
-      const executeBotActions = async () => {
-        while (gameState.turnActions > 0 && gameState.currentPlayerIndex === 1) {
-          const currentBot = gameState.players.find(p => p.isBot);
-          const currentHuman = gameState.players.find(p => !p.isBot);
-          
-          if (!currentBot || !currentHuman) break;
-          
-          const action = getBotAction(currentBot, currentHuman);
-          
-          if (action.type === 'end_turn' || gameState.turnActions <= 0) break;
-          
-          if (action.cardId) {
-            const card = currentBot.hand.find(c => c.id === action.cardId);
-            playCard(currentBot.id, action.cardId);
-            
-            // Show what bot played
-            setTimeout(() => {
-              toast({
-                title: `Abu Fadi played: ${card?.title}`,
-                description: card?.titleArabic || "البوت لعب بطاقة",
-              });
-            }, 1000);
-          }
-          
-          // Wait longer between moves
-          await new Promise(resolve => setTimeout(resolve, 3000));
-        }
-        
-        // End turn after all actions
-        setTimeout(() => {
+      // Schedule next action or end turn
+      setTimeout(() => {
+        if (gameState.turnActions <= 0) {
           endTurn();
-        }, 2000);
-      };
-      
-      executeBotActions();
-      return currentState;
-    });
+        } else {
+          executeBotTurn(); // Recursive call for next action
+        }
+      }, 3000);
+    } else {
+      endTurn();
+    }
   }, [gameState, getBotAction, playCard, endTurn, toast]);
 
   return {
