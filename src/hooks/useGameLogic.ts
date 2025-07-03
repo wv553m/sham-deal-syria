@@ -269,42 +269,45 @@ export const useGameLogic = () => {
     return { type: 'end_turn' };
   }, []);
 
-  const executeBotTurn = useCallback(async () => {
-    if (gameState.currentPlayerIndex !== 1 || gameState.turnActions <= 0) return;
-    
-    const botPlayer = gameState.players.find(p => p.isBot);
-    const humanPlayer = gameState.players.find(p => !p.isBot);
-    
-    if (!botPlayer || !humanPlayer) return;
-    
-    // Execute one action at a time
-    const action = getBotAction(botPlayer, humanPlayer);
-    
-    if (action.type === 'end_turn' || gameState.turnActions <= 0) {
+  const executeBotTurn = useCallback(() => {
+    // Check if it's bot's turn and has actions left
+    if (gameState.currentPlayerIndex !== 1 || gameState.turnActions <= 0) {
       endTurn();
       return;
     }
     
-    if (action.cardId) {
-      const card = botPlayer.hand.find(c => c.id === action.cardId);
+    const botPlayer = gameState.players.find(p => p.isBot);
+    const humanPlayer = gameState.players.find(p => !p.isBot);
+    
+    if (!botPlayer || !humanPlayer) {
+      endTurn();
+      return;
+    }
+    
+    const action = getBotAction(botPlayer, humanPlayer);
+    
+    if (action.type === 'end_turn' || !action.cardId) {
+      endTurn();
+      return;
+    }
+    
+    // Execute one action
+    const card = botPlayer.hand.find(c => c.id === action.cardId);
+    if (card) {
       playCard(botPlayer.id, action.cardId);
       
       toast({
-        title: `Abu Fadi played: ${card?.title}`,
-        description: card?.titleArabic || "البوت لعب بطاقة",
+        title: `Abu Fadi played: ${card.title}`,
+        description: card.titleArabic || "البوت لعب بطاقة",
       });
-      
-      // Schedule next action or end turn
-      setTimeout(() => {
-        if (gameState.turnActions <= 0) {
-          endTurn();
-        } else {
-          executeBotTurn(); // Recursive call for next action
-        }
-      }, 3000);
-    } else {
-      endTurn();
     }
+    
+    // Check if turn should end after this action
+    setTimeout(() => {
+      if (gameState.turnActions <= 0) {
+        endTurn();
+      }
+    }, 100); // Very short delay to let state update
   }, [gameState, getBotAction, playCard, endTurn, toast]);
 
   return {
