@@ -412,34 +412,47 @@ export const useGameLogic = () => {
   }, []);
 
   const getCompletedSets = (properties: GameCardData[]): number => {
+    // Group properties by assigned color (including wild cards with assignedColor)
     const colorGroups: { [key: string]: GameCardData[] } = {};
     
-    // Group properties by color (exclude wild cards from grouping)
     properties.forEach(prop => {
-      if (prop.color && !prop.isWild) {
-        if (!colorGroups[prop.color]) {
-          colorGroups[prop.color] = [];
+      let color: string | null = null;
+      
+      if (prop.isWild && prop.assignedColor) {
+        // Wild card assigned to a specific color
+        color = prop.assignedColor;
+      } else if (!prop.isWild && prop.color) {
+        // Regular property card
+        color = prop.color;
+      }
+      
+      if (color) {
+        if (!colorGroups[color]) {
+          colorGroups[color] = [];
         }
-        colorGroups[prop.color].push(prop);
+        colorGroups[color].push(prop);
       }
     });
     
-    // Count wild cards
-    const wildCount = properties.filter(p => p.isWild).length;
+    // Count unassigned wild cards
+    const unassignedWildCount = properties.filter(p => p.isWild && !p.assignedColor).length;
     
     // Check completed sets
     let completedSets = 0;
     let wildCardsUsed = 0;
     
-    Object.values(colorGroups).forEach(group => {
-      const setSize = group[0]?.setSize || 2;
+    // Define set sizes for each color
+    const colorSetSizes = { red: 4, blue: 3, green: 2, yellow: 3 };
+    
+    Object.entries(colorGroups).forEach(([color, group]) => {
+      const setSize = colorSetSizes[color as keyof typeof colorSetSizes] || 2;
       const cardsNeeded = setSize - group.length;
       
       if (cardsNeeded <= 0) {
-        // Set is complete without wild cards
+        // Set is complete without additional wild cards
         completedSets++;
-      } else if (cardsNeeded <= (wildCount - wildCardsUsed)) {
-        // Set can be completed with wild cards
+      } else if (cardsNeeded <= (unassignedWildCount - wildCardsUsed)) {
+        // Set can be completed with unassigned wild cards
         completedSets++;
         wildCardsUsed += cardsNeeded;
       }

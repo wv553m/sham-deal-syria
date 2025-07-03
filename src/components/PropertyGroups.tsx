@@ -6,9 +6,20 @@ interface PropertyGroupsProps {
 }
 
 const PropertyGroups = ({ properties }: PropertyGroupsProps) => {
-  // Group properties by color
+  // Group properties by color, using assignedColor for wild cards
   const groupedProperties = properties.reduce((groups, card) => {
-    const color = card.isWild ? 'wild' : (card.color || 'unknown');
+    // For wild cards that have been assigned a color, use assignedColor
+    // Otherwise, use the card's original color or 'wild' for unassigned wild cards
+    let color: string;
+    
+    if (card.isWild && card.assignedColor) {
+      color = card.assignedColor;
+    } else if (card.isWild) {
+      color = 'wild';
+    } else {
+      color = card.color || 'unknown';
+    }
+    
     if (!groups[color]) {
       groups[color] = [];
     }
@@ -19,7 +30,10 @@ const PropertyGroups = ({ properties }: PropertyGroupsProps) => {
   const getGroupStatus = (group: GameCardData[], color: string) => {
     if (color === 'wild') return null;
     
-    const setSize = group[0]?.setSize || 2;
+    // Get setSize from first non-wild card, or use color-based defaults
+    const colorDefaults = { red: 4, blue: 3, green: 2, yellow: 3 };
+    const setSize = group.find(c => !c.isWild)?.setSize || colorDefaults[color as keyof typeof colorDefaults] || 2;
+    
     const isComplete = group.length >= setSize;
     
     console.log(`Group ${color}: ${group.length}/${setSize} cards, Complete: ${isComplete}`);
