@@ -86,7 +86,7 @@ export const useGameLogic = () => {
     });
   }, []);
 
-  const playCard = useCallback((playerId: string, cardId: string) => {
+  const playCard = useCallback((playerId: string, cardId: string, selectedColor?: string) => {
     setGameState(prev => {
       const newState = { ...prev };
       const playerIndex = newState.players.findIndex(p => p.id === playerId);
@@ -99,20 +99,31 @@ export const useGameLogic = () => {
       if (cardIndex === -1) return prev;
       
       const card = player.hand[cardIndex];
+      
+      // Handle wild cards - need color selection
+      if (card.isWild && card.type === 'property' && !selectedColor) {
+        // Set pending wild card state
+        newState.pendingWildCard = {
+          cardId: card.id,
+          playerId: playerId
+        };
+        return newState;
+      }
+      
       player.hand.splice(cardIndex, 1);
       
       // Handle different card types
       if (card.type === 'property') {
-        // Group properties by color for better organization
-        const existingGroup = player.properties.filter(p => 
-          !p.isWild && p.color === card.color
-        );
+        // For wild cards, assign the selected color
+        const propertyCard = { ...card };
+        if (card.isWild && selectedColor) {
+          propertyCard.color = selectedColor;
+          propertyCard.assignedColor = selectedColor; // Keep track of original assignment
+        }
         
-        // Add to properties array
-        player.properties.push(card);
+        player.properties.push(propertyCard);
         
-        console.log(`Property added: ${card.title}, Color: ${card.color}, Set size: ${card.setSize}`);
-        console.log(`Current ${card.color} properties:`, existingGroup.length + 1);
+        console.log(`Property added: ${propertyCard.title}, Color: ${propertyCard.color}, Set size: ${propertyCard.setSize}`);
       } else if (card.type === 'action') {
         // Handle action card effects
         handleActionCard(card, newState, playerIndex);
@@ -120,11 +131,23 @@ export const useGameLogic = () => {
       
       newState.discardPile.push(card);
       newState.turnActions--;
+      newState.pendingWildCard = undefined; // Clear pending state
       
       console.log(`Turn actions remaining: ${newState.turnActions}`);
       
       return newState;
     });
+  }, []);
+
+  const selectWildCardColor = useCallback((color: string) => {
+    if (!gameState.pendingWildCard) return;
+    
+    const { cardId, playerId } = gameState.pendingWildCard;
+    playCard(playerId, cardId, color);
+  }, [gameState.pendingWildCard, playCard]);
+
+  const cancelWildCard = useCallback(() => {
+    setGameState(prev => ({ ...prev, pendingWildCard: undefined }));
   }, []);
 
   const bankCard = useCallback((playerId: string, cardId: string) => {
@@ -318,6 +341,8 @@ export const useGameLogic = () => {
     bankCard,
     endTurn,
     executeBotTurn,
-    getCompletedSets
+    getCompletedSets,
+    selectWildCardColor,
+    cancelWildCard
   };
 };

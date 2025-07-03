@@ -18,6 +18,10 @@ export interface GameState {
   gamePhase: 'setup' | 'playing' | 'ended';
   winner?: Player;
   turnActions: number; // remaining actions for current turn (max 3)
+  pendingWildCard?: {
+    cardId: string;
+    playerId: string;
+  };
 }
 
 export interface BotAction {

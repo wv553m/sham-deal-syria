@@ -159,8 +159,8 @@ export const wildCards: GameCardData[] = [
   {
     id: 'wild-syrian-eagle',
     type: 'property',
-    title: 'Syrian Eagle',
-    titleArabic: 'النسر السوري',
+    title: 'Syrian Falcon',
+    titleArabic: 'الشاهين السوري',
     description: 'Can be any property',
     value: 0,
     icon: '🦅',

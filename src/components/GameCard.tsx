@@ -12,6 +12,7 @@ export interface GameCardData {
   image?: string;
   setSize?: number; // for property cards
   isWild?: boolean; // for wild cards
+  assignedColor?: string; // for wild cards that have been assigned a color
 }
 
 interface GameCardProps {

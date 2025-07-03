@@ -7,6 +7,7 @@ import GameCard, { GameCardData } from "./GameCard";
 import GameRules from "./GameRules";
 import BankArea from "./BankArea";
 import PropertyGroups from "./PropertyGroups";
+import WildCardSelector from "./WildCardSelector";
 import { allCards, propertyCards, actionCards, moneyCards } from "@/data/gameCards";
 import { useGameLogic } from "@/hooks/useGameLogic";
 import { Player } from "@/types/game";
@@ -21,7 +22,9 @@ const GameBoard = () => {
     bankCard,
     endTurn, 
     executeBotTurn,
-    getCompletedSets 
+    getCompletedSets,
+    selectWildCardColor,
+    cancelWildCard
   } = useGameLogic();
 
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
@@ -55,6 +58,11 @@ const GameBoard = () => {
 
   const getBankValue = (player: Player) => {
     return player.bank.reduce((sum, card) => sum + (card.value || 0), 0);
+  };
+
+  const handleCancelWildCard = () => {
+    // This will be handled through the useGameLogic hook
+    console.log("Cancel wild card selection");
   };
 
   const renderPlayerArea = (player: Player, isCurrentPlayer: boolean) => {
@@ -309,6 +317,14 @@ const GameBoard = () => {
             <GameRules />
           </TabsContent>
         </Tabs>
+        
+        {/* Wild Card Color Selector */}
+        {gameState.pendingWildCard && (
+          <WildCardSelector 
+            onSelectColor={selectWildCardColor}
+            onCancel={cancelWildCard}
+          />
+        )}
       </div>
     </div>
   );
