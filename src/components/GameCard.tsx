@@ -136,7 +136,7 @@ const GameCard = ({ card, isSelected, isFlipped, onClick, className }: GameCardP
             </div>
           )}
           {card.description && (
-            <div className="text-[8px] opacity-80 leading-tight">
+            <div className="text-[7px] opacity-80 leading-tight line-clamp-2 overflow-hidden break-words">
               {card.description}
             </div>
           )}
