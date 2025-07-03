@@ -254,7 +254,7 @@ export const actionCards: GameCardData[] = [
     titleArabic: 'إيجار شامل',
     description: 'Collect rent from any color',
     icon: '🌟',
-    value: 3,
+    value: 1,
     rentColors: ['red', 'blue', 'green', 'yellow']
   }
 ];

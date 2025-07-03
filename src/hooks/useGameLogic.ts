@@ -259,6 +259,24 @@ export const useGameLogic = () => {
     });
   };
 
+  const getBestRentColor = (player: Player, availableColors: string[]): string | null => {
+    let bestColor = null;
+    let maxRent = 0;
+    
+    for (const color of availableColors) {
+      const colorProperties = player.properties.filter(p => p.color === color || p.assignedColor === color);
+      if (colorProperties.length > 0) {
+        const rent = calculateRent(colorProperties, color);
+        if (rent > maxRent) {
+          maxRent = rent;
+          bestColor = color;
+        }
+      }
+    }
+    
+    return bestColor;
+  };
+
   const cancelAction = useCallback(() => {
     setGameState(prev => ({ 
       ...prev, 
@@ -407,14 +425,33 @@ export const useGameLogic = () => {
       case 'rent-red-yellow':
       case 'rent-blue-green':
       case 'rent-wild':
-        // Rent collection - need to select color
+        // Rent collection - for bot, auto-select best color, for human, show selector
         const rentCard = card as any;
-        gameState.pendingRent = {
-          cardId: card.id,
-          playerId: player.id,
-          availableColors: rentCard.rentColors || []
-        };
-        return 'pending';
+        
+        if (player.isBot) {
+          // Bot auto-selects the best color for rent
+          const bestColor = getBestRentColor(player, rentCard.rentColors || []);
+          if (bestColor) {
+            // Auto-execute rent for bot
+            const opponentIndex = 1 - playerIndex;
+            const rentOpponent = gameState.players[opponentIndex];
+            const colorProperties = player.properties.filter(p => p.color === bestColor || p.assignedColor === bestColor);
+            const rentAmount = calculateRent(colorProperties, bestColor);
+            collectRentFromPlayer(rentOpponent, player, rentAmount);
+            return 'complete';
+          } else {
+            // Bot shouldn't play this card if no valid colors
+            return 'complete';
+          }
+        } else {
+          // Human player - show color selector
+          gameState.pendingRent = {
+            cardId: card.id,
+            playerId: player.id,
+            availableColors: rentCard.rentColors || []
+          };
+          return 'pending';
+        }
         
       default:
         return 'complete';
@@ -502,22 +539,45 @@ export const useGameLogic = () => {
   };
 
   const getBotAction = useCallback((botPlayer: Player, opponent: Player): BotAction => {
-    // Simple AI logic
+    // Simple AI logic with rent card validation
     const properties = botPlayer.hand.filter(c => c.type === 'property');
     const actions = botPlayer.hand.filter(c => c.type === 'action');
     const money = botPlayer.hand.filter(c => c.type === 'money');
     
-    // Priority: Play properties first, then actions, then money
+    // Check for rent cards that the bot can actually use
+    const usableRentCards = actions.filter(card => {
+      if (!card.id.startsWith('rent-')) return true; // Non-rent action cards
+      
+      const rentCard = card as any;
+      const availableColors = rentCard.rentColors || [];
+      
+      // Check if bot has properties in any of the rent colors
+      for (const color of availableColors) {
+        const colorProperties = botPlayer.properties.filter(p => p.color === color || p.assignedColor === color);
+        if (colorProperties.length > 0) {
+          return true; // Bot has properties to collect rent from
+        }
+      }
+      return false; // Bot has no properties in the rent colors
+    });
+    
+    // Priority: Play properties first, then usable actions, then money
     if (properties.length > 0) {
       return { type: 'play_property', cardId: properties[0].id };
     }
     
-    if (actions.length > 0) {
-      return { type: 'play_action', cardId: actions[0].id };
+    if (usableRentCards.length > 0) {
+      return { type: 'play_action', cardId: usableRentCards[0].id };
     }
     
     if (money.length > 0) {
       return { type: 'play_money', cardId: money[0].id };
+    }
+    
+    // If bot has rent cards but can't use them, bank them
+    const unusableRentCards = actions.filter(card => card.id.startsWith('rent-'));
+    if (unusableRentCards.length > 0) {
+      return { type: 'bank_card', cardId: unusableRentCards[0].id };
     }
     
     return { type: 'end_turn' };
@@ -548,12 +608,24 @@ export const useGameLogic = () => {
     const card = botPlayer.hand.find(c => c.id === action.cardId);
     if (card) {
       console.log(`Bot playing card: ${card.title}, Actions before: ${gameState.turnActions}`);
-      playCard(botPlayer.id, action.cardId);
       
-      toast({
-        title: `Abu Fadi played: ${card.title}`,
-        description: card.titleArabic || "البوت لعب بطاقة",
-      });
+      if (action.type === 'bank_card') {
+        // Bot banks the card instead of playing it
+        bankCard(botPlayer.id, action.cardId);
+        
+        toast({
+          title: `Abu Fadi banked: ${card.title}`,
+          description: card.titleArabic || "البوت وضع البطاقة في البنك",
+        });
+      } else {
+        // Bot plays the card normally
+        playCard(botPlayer.id, action.cardId);
+        
+        toast({
+          title: `Abu Fadi played: ${card.title}`,
+          description: card.titleArabic || "البوت لعب بطاقة",
+        });
+      }
       
       // Check if bot should end turn after this action
       setTimeout(() => {

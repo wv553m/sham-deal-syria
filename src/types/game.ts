@@ -44,7 +44,7 @@ export interface GameState {
 }
 
 export interface BotAction {
-  type: 'play_property' | 'play_action' | 'play_money' | 'end_turn';
+  type: 'play_property' | 'play_action' | 'play_money' | 'bank_card' | 'end_turn';
   cardId?: string;
   targetPlayerId?: string;
 }
