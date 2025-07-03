@@ -8,33 +8,55 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 45 25% 96%;
+    --foreground: 25 45% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 25 45% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 25 45% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 25 65% 45%;
+    --primary-foreground: 45 25% 96%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 200 45% 55%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 45 15% 88%;
+    --muted-foreground: 25 25% 55%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 35 85% 65%;
+    --accent-foreground: 25 45% 15%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 45 15% 85%;
+    --input: 45 15% 85%;
+    --ring: 25 65% 45%;
+
+    /* Syrian-themed colors */
+    --damascus-blue: 200 45% 55%;
+    --terracotta: 25 65% 45%;
+    --golden-sand: 35 85% 65%;
+    --olive-green: 85 35% 45%;
+    --warm-cream: 45 25% 96%;
+    
+    /* Gradients */
+    --gradient-syrian: linear-gradient(135deg, hsl(var(--terracotta)), hsl(var(--golden-sand)));
+    --gradient-damascus: linear-gradient(135deg, hsl(var(--damascus-blue)), hsl(var(--terracotta)));
+    --gradient-sunset: linear-gradient(180deg, hsl(var(--golden-sand)), hsl(var(--terracotta)));
+    --gradient-card: linear-gradient(145deg, hsl(var(--warm-cream)), hsl(45 20% 92%));
+    
+    /* Shadows */
+    --shadow-card: 0 4px 20px hsl(var(--terracotta) / 0.15);
+    --shadow-card-hover: 0 8px 30px hsl(var(--terracotta) / 0.25);
+    --shadow-elegant: 0 10px 40px hsl(var(--damascus-blue) / 0.2);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-card: transform 0.2s ease-out, box-shadow 0.2s ease-out;
 
     --radius: 0.5rem;
 
