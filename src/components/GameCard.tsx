@@ -94,7 +94,7 @@ const GameCard = ({ card, isSelected, isFlipped, onClick, className }: GameCardP
   return (
     <div
       className={cn(
-        "relative w-32 h-48 rounded-lg border-2 cursor-pointer transition-all duration-300",
+        "relative w-36 h-56 rounded-lg border-2 cursor-pointer transition-all duration-300",
         "hover:animate-card-hover hover:shadow-card-hover",
         "transform-gpu perspective-1000",
         styles.background,
@@ -112,10 +112,10 @@ const GameCard = ({ card, isSelected, isFlipped, onClick, className }: GameCardP
         isFlipped && "opacity-0"
       )}>
         {/* Header */}
-        <div className="text-center">
-          <div className="text-[10px] font-bold mb-1 leading-tight">{card.title}</div>
+        <div className="text-center mb-1">
+          <div className="text-xs font-bold mb-1 leading-tight">{card.title}</div>
           {card.titleArabic && (
-            <div className="text-[9px] opacity-80 font-medium leading-tight" dir="rtl">
+            <div className="text-[10px] opacity-80 font-medium leading-tight" dir="rtl">
               {card.titleArabic}
             </div>
           )}
@@ -129,19 +129,19 @@ const GameCard = ({ card, isSelected, isFlipped, onClick, className }: GameCardP
         </div>
 
         {/* Value/Description */}
-        <div className="text-center">
+        <div className="text-center space-y-1">
           {card.value !== undefined && (
-            <div className="text-sm font-bold">
+            <div className="text-base font-bold">
               {card.type === 'money' ? `${card.value}K` : card.value}
             </div>
           )}
           {card.description && (
-            <div className="text-[7px] opacity-80 leading-tight line-clamp-2 overflow-hidden break-words">
+            <div className="text-[9px] opacity-80 leading-tight px-1">
               {card.description}
             </div>
           )}
           {card.setSize && (
-            <div className="text-[6px] opacity-60 mt-1 truncate">
+            <div className="text-[8px] opacity-60">
               Set: {card.setSize}
             </div>
           )}
