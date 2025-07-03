@@ -94,7 +94,7 @@ const GameCard = ({ card, isSelected, isFlipped, onClick, className }: GameCardP
   return (
     <div
       className={cn(
-        "relative w-36 h-56 rounded-lg border-2 cursor-pointer transition-all duration-300",
+        "relative w-48 h-72 rounded-lg border-2 cursor-pointer transition-all duration-300",
         "hover:animate-card-hover hover:shadow-card-hover",
         "transform-gpu perspective-1000 overflow-hidden",
         styles.background,
@@ -112,36 +112,36 @@ const GameCard = ({ card, isSelected, isFlipped, onClick, className }: GameCardP
         isFlipped && "opacity-0"
       )}>
         {/* Header */}
-        <div className="text-center mb-2 flex-shrink-0">
-          <div className="text-[10px] font-bold leading-tight truncate px-1">{card.title}</div>
+        <div className="text-center mb-3 flex-shrink-0">
+          <div className="text-sm font-bold leading-tight truncate px-1">{card.title}</div>
           {card.titleArabic && (
-            <div className="text-[8px] opacity-80 font-medium leading-tight truncate px-1" dir="rtl">
+            <div className="text-xs opacity-80 font-medium leading-tight truncate px-1 mt-1" dir="rtl">
               {card.titleArabic}
             </div>
           )}
         </div>
 
         {/* Icon/Image */}
-        <div className="flex-1 flex items-center justify-center min-h-8">
+        <div className="flex-1 flex items-center justify-center min-h-12">
           {card.icon && (
-            <div className="text-xl">{card.icon}</div>
+            <div className="text-4xl">{card.icon}</div>
           )}
         </div>
 
         {/* Value/Description */}
-        <div className="text-center flex-shrink-0 space-y-1 overflow-hidden">
+        <div className="text-center flex-shrink-0 space-y-2 overflow-hidden">
           {card.value !== undefined && (
-            <div className="text-sm font-bold">
+            <div className="text-lg font-bold">
               {card.type === 'money' ? `${card.value}K` : card.value}
             </div>
           )}
           {card.description && (
-            <div className="text-[7px] opacity-80 leading-tight line-clamp-2 px-1">
+            <div className="text-xs opacity-80 leading-tight line-clamp-3 px-2">
               {card.description}
             </div>
           )}
           {card.setSize && (
-            <div className="text-[7px] opacity-60 truncate">
+            <div className="text-xs opacity-60">
               Set: {card.setSize}
             </div>
           )}

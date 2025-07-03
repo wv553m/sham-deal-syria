@@ -61,9 +61,9 @@ const PropertyGroups = ({ properties }: PropertyGroupsProps) => {
                 </Badge>
               )}
             </div>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               {group.map((card) => (
-                <GameCard key={card.id} card={card} className="w-16 h-24" />
+                <GameCard key={card.id} card={card} className="w-32 h-48" />
               ))}
             </div>
           </div>

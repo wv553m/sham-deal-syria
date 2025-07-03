@@ -107,7 +107,7 @@ const GameBoard = () => {
             {!player.isBot ? (
               <div>
                 <h4 className="font-semibold mb-2">Your Hand • يدك:</h4>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                   {player.hand.map((card) => (
                     <div
                       key={card.id}
@@ -117,7 +117,7 @@ const GameBoard = () => {
                     >
                       <GameCard
                         card={card}
-                        className="w-20 h-28 hover:scale-105 transition-transform"
+                        className="hover:scale-105 transition-transform"
                       />
                     </div>
                   ))}
