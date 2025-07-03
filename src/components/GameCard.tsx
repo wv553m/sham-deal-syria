@@ -141,8 +141,8 @@ const GameCard = ({ card, isSelected, isFlipped, onClick, className }: GameCardP
             </div>
           )}
           {card.setSize && (
-            <div className="text-[8px] opacity-60 mt-1">
-              Set: {card.setSize} cards
+            <div className="text-[6px] opacity-60 mt-1 truncate">
+              Set: {card.setSize}
             </div>
           )}
         </div>
